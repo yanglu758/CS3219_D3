@@ -1,0 +1,23 @@
+{
+  "name": "cs3219_a4_d3",
+  "version": "1.0.0",
+  "description": "CS3219 Assignment 4 Visualisation using D3",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yang07ly/CS3219_D3.git"
+  },
+  "author": "Yang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yang07ly/CS3219_D3/issues"
+  },
+  "homepage": "https://github.com/yang07ly/CS3219_D3#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}
