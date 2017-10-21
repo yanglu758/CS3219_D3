@@ -7,7 +7,10 @@ const LineByLineReader = require('line-by-line'),
 
 var topPapers;
 var topAuthors;
+var publicationYearsResult;
 var recompiledMap;
+var nodes;
+var links;
 
 main();
 
@@ -16,7 +19,7 @@ function main() {
 }
 
 function parse() {
-	var lr = new LineByLineReader('tiny1000.json');
+	var lr = new LineByLineReader('data.json');
 	var maps = new Array();
 
 	console.log("Loading data.json...");
@@ -30,8 +33,9 @@ function parse() {
 		lr.resume();
 	});
 	lr.on('end', function() {
-		console.log("Completed! Serving client-side files now");
-		console.log(maps.length);
+		console.log("Completed loading data.json.");
+		console.log("Parsing data.json...");
+		console.log("Completed parsing data.json.");
 		processMap(maps, 'arXiv');
 		serve();
 	});
@@ -40,7 +44,7 @@ function parse() {
 function serve() {
 	app.use(express.static(__dirname + '/static'));
 	app.listen(process.env.PORT || 8080, function() {
-		console.log("Serving the app on 8080");
+		console.log("Serving the app on 8080...");
 	});
 	app.get('/', function(req, res) {
 		res.send("Welcome to D3!");
@@ -49,7 +53,7 @@ function serve() {
 		res.sendFile(path.join(__dirname + '/static/q1.html'));
 	});
 	app.get('/Q2', function(req, res) {
-		res.sendFile(path.join(__dirname + '/static/Q2_papers.html'));
+		res.sendFile(path.join(__dirname + '/static/q2.html'));
 	});
 	app.get('/Q3', function(req, res) {
 		res.sendFile(path.join(__dirname + '/static/q3.html'));
@@ -66,9 +70,15 @@ function serve() {
 	app.get('/top_authors', function(req, res) {
 		res.send(topAuthors);
 	});
+	app.get('/publication_years', function(req, res) {
+		res.send(publicationYearsResult);
+	});
 	app.get('/recompiledMap', function(req, res) {
 		res.send(recompiledMap);
-	})
+	});
+	app.get('/web_elements', function(req, res) {
+		res.send({ nodes: nodes, links: links });
+	});
 }
 
 function processMap(maps, venue) {
@@ -78,19 +88,16 @@ function processMap(maps, venue) {
 	var paperCitations = new Object();
 	var publicationYears = new Object();
 	recompiledMap = new Object();
-	console.log(maps[1]);
 	for (var i = 0; i < maps.length; i++) {
 		var id = maps[i]["id"];
 		if (maps[i] && maps[i]["venue"] && maps[i]["venue"].toLowerCase().includes(venue)) {
 			// Q1 top authors			
 			for (var j=0; j<maps[i]["authors"].length; j++) {
-				//console.log(authors[j]["name"]);
 				var name = maps[i]["authors"][j]["name"];
 				var id = maps[i]["authors"][j]["ids"];
 				if (relatedAuthors[id] == undefined) {
 					relatedAuthors[id] = { name: name, nCitations: 1 };
 				} else relatedAuthors[id]["nCitations"]++;
-				//console.log(relatedAuthors);
 			}
 
 			// Q2 top papers
@@ -106,34 +113,79 @@ function processMap(maps, venue) {
 			else publicationYears[year] = 1;
 		}
 		// Q4
-		recompiledMap[id] = maps[i];
-	}
+		recompiledMap[id] = maps[i];	}
 
 	var pqAuthors = new PriorityQueue(function (a, b) {
 		return a.nCitations - b.nCitations;
 	});
 	// sorting by priority queue
 	for (var key in relatedAuthors) {
-		pqAuthors.enq({id: key, name: relatedAuthors[key]["name"], nCitations: relatedAuthors[key]["nCitations"]})
+		pqAuthors.enq({
+			id: +key, 
+			name: relatedAuthors[key]["name"], 
+			nCitations: relatedAuthors[key]["nCitations"],
+			enabled: true
+		})
 	}
 	topAuthors = new Array();
 	for (var i=0; i<10; i++) {
 		if (pqAuthors.size()>0) topAuthors.push(pqAuthors.deq());
 	}
-	console.log(topAuthors);
 	var pqCitations = new PriorityQueue(function (a, b) {
 		return a.nInCitations - b.nInCitations;
 	});
 	for (var key in paperCitations) {
-		pqCitations.enq({id: key, title: paperCitations[key]["title"], nInCitations: paperCitations[key]["nInCitations"]})
+		pqCitations.enq({
+			id: +key, 
+			title: paperCitations[key]["title"], 
+			nInCitations: paperCitations[key]["nInCitations"],
+			enabled: true
+		})
 	}
 	topPapers = new Array();
-	for (var i=0; i<10; i++) {
+	for (var i=0; i<5; i++) {
 		if (pqCitations.size()>0) topPapers.push(pqCitations.deq());
 	}
-	console.log(topPapers);
 
 	Object.keys(publicationYears).sort();
-	console.log(publicationYears);
-	//console.log(recompiledMap['0004750d9cfbedadef463fdd1071be1000ff21d3']['inCitations'][0]);
+	publicationYearsResult = new Array();
+	for (var year in publicationYears) {
+		publicationYearsResult.push({
+			year: Date.parse(year),
+			noOfPub: +publicationYears[year]
+		});
+	}
+
+	//Q4
+	nodes = new Array();
+	links = new Array();
+	generateNodes(recompiledMap, "36adf8c327b95bdffe2778bf022e0234d433454a", 0);
+	console.log(nodes);
+	console.log(links);
+}
+
+function generateNodes(map, node, nNest) {
+	var source = map[node];
+	if (nNest<=2 && node) {
+		if (source) {
+			nodes.push({
+				id: source["id"],
+				title: source["title"],
+				authors: source["authors"],
+				year: source["year"],
+				venue: source["venue"]
+			});
+
+			var targets = map[node]["inCitations"];
+			for (var i = 0; i < targets.length; i++) {
+				links.push({
+					source: node,
+					target: targets[i]
+				});
+				generateNodes(map, targets[i], nNest+1);
+			}
+		} else {
+			nodes.push({ id: node });
+		}
+	}
 }
