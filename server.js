@@ -11,6 +11,7 @@ var publicationYearsResult;
 var recompiledMap;
 var nodes;
 var links;
+var topPapersOutCitations;
 
 main();
 
@@ -79,6 +80,9 @@ function serve() {
 	app.get('/web_elements', function(req, res) {
 		res.send({ nodes: nodes, links: links });
 	});
+	app.get('/top_out_citations', function(req, res) {
+		res.send(topPapersOutCitations);
+	})
 }
 
 function processMap(maps, venue) {
@@ -87,6 +91,7 @@ function processMap(maps, venue) {
 	var relatedAuthors = new Object();
 	var paperCitations = new Object();
 	var publicationYears = new Object();
+	var papersOutCitations = new Object();
 	recompiledMap = new Object();
 	for (var i = 0; i < maps.length; i++) {
 		var id = maps[i]["id"];
@@ -113,7 +118,13 @@ function processMap(maps, venue) {
 			else publicationYears[year] = 1;
 		}
 		// Q4
-		recompiledMap[id] = maps[i];	}
+		recompiledMap[id] = maps[i];
+
+		//Q5
+		var nInCitations = maps[i]["outCitations"].length;
+		if (papersOutCitations[id]) papersOutCitations[id]["nInCitations"]+=nInCitations;
+		else papersOutCitations[id] = { nInCitations: nInCitations, title: maps[i]["title"] }
+	}
 
 	var pqAuthors = new PriorityQueue(function (a, b) {
 		return a.nCitations - b.nCitations;
@@ -136,7 +147,7 @@ function processMap(maps, venue) {
 	});
 	for (var key in paperCitations) {
 		pqCitations.enq({
-			id: +key, 
+			id: key, 
 			title: paperCitations[key]["title"], 
 			nInCitations: paperCitations[key]["nInCitations"],
 			enabled: true
@@ -162,11 +173,29 @@ function processMap(maps, venue) {
 	generateNodes(recompiledMap, "36adf8c327b95bdffe2778bf022e0234d433454a", 0);
 	console.log(nodes);
 	console.log(links);
+
+	//Q5
+	pqCitations = new PriorityQueue(function (a, b) {
+		return a.nInCitations - b.nInCitations;
+	});
+	for (var key in papersOutCitations) {
+		pqCitations.enq({
+			id: key, 
+			title: papersOutCitations[key]["title"], 
+			nInCitations: papersOutCitations[key]["nInCitations"],
+			enabled: true
+		})
+	}
+	topPapersOutCitations = new Array();
+	for (var i=0; i<10; i++) {
+		if (pqCitations.size()>0) topPapersOutCitations.push(pqCitations.deq());
+	}
+	console.log(topPapersOutCitations);
 }
 
 function generateNodes(map, node, nNest) {
 	var source = map[node];
-	if (nNest<=2 && node) {
+	if (nNest<=0 && node) {
 		if (source) {
 			nodes.push({
 				id: source["id"],

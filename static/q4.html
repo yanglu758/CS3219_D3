@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!DOCTYPE html>
+        <meta charset="utf-8">
+        <style>
+
+            .links line {
+                stroke: #999;
+                stroke-opacity: 0.6;
+            }
+
+            .nodes circle {
+                stroke: #fff;
+                stroke-width: 1.5px;
+            }
+
+            .d3-tip {
+                line-height: 1;
+                font-weight: bold;
+                font-size: 3px;
+                padding: 1px;
+                background: rgba(0, 0, 0, 0.8);
+                color: #fff;
+                border-radius: 2px;
+            }
+
+            /* Creates a small triangle extender for the tooltip */
+            .d3-tip:after {
+                box-sizing: border-box;
+                display: inline;
+                font-size: 2px;
+                width: 100%;
+                line-height: 1;
+                color: rgba(0, 0, 0, 0.8);
+                content: "\25BC";
+                position: absolute;
+                text-align: center;
+            }
+
+            /* Style northward tooltips differently */
+            .d3-tip.n:after {
+                margin: -1px 0 0 0;
+                top: 100%;
+                left: 0;
+            }
+
+        </style>
+        <svg width="960" height="600"></svg>
+        <script src="d3.v4.min.js"></script>
+        <script src="d3-tip.js"></script>
+        <script type="text/javascript" src="jquery-3.2.1.min.js"></script>
+        <script>
+
+            var svg = d3.select("svg"),
+                width = +svg.attr("width"),
+                height = +svg.attr("height");
+
+            svg.append("svg:defs").selectAll("marker")
+                .data(["end"])      // Different link/path types can be defined here
+                .enter().append("svg:marker")    // This section adds in the arrows
+                .attr("id", String)
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 19)
+                .attr("refY", 0)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("svg:path")
+                .attr("d", "M0,-5L10,0L0,5");
+
+            var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+            var simulation = d3.forceSimulation()
+            .force("link", d3.forceLink().id(function(d) { return d.id; }))
+            .force("charge", d3.forceManyBody())
+            .force("center", d3.forceCenter(width / 2, height / 2));
+
+            //tooltip
+            var tool_tip = d3.tip()
+            .attr("class", "d3-tip")
+            .offset([-9, 0])
+            .html(function(d) {
+                var authors = d.authors;
+                var output = "";
+                for(var i = 0; i < authors.length; i++) {
+                    output = output + authors[i]["name"] + "<br>";
+                }
+                return "<p>ID: " + d.id + "<br>" + "Title: " + d.title + "<br>" + "Authors: " + "<br>" + output + "</p>";
+            });
+            svg.call(tool_tip);
+
+            d3.json("web_elements", function(error, graph) {
+                console.log(graph);
+
+                var link = svg.append("g")
+                .attr("class", "links")
+                .selectAll("line")
+                .data(graph.links)
+                .enter().append("line")
+                .attr("marker-end", "url(#end)")
+                .attr("stroke-width", function(d) { return Math.sqrt(d.value); 
+                });
+
+                var node = svg.append("g")
+                .attr("class", "nodes")
+                .selectAll("circle")
+                .data(graph.nodes)
+                .enter().append("circle")
+                .attr("r", 5)
+                .attr("fill", function(d) { return color(d.group); })
+                .call(d3.drag()
+                  .on("start", dragstarted)
+                  .on("drag", dragged)
+                  .on("end", dragended))
+                .on('mouseover', tool_tip.show)
+                .on('mouseout', tool_tip.hide);
+
+                node.append("title")
+                .text(function(d) { return d.id; });
+
+
+                simulation
+                .nodes(graph.nodes)
+                .on("tick", ticked);
+
+                simulation.force("link")
+                .links(graph.links);
+
+                function ticked() {
+                    link
+                    .attr("x1", function(d) { return d.source.x; })
+                    .attr("y1", function(d) { return d.source.y; })
+                    .attr("x2", function(d) { return d.target.x; })
+                    .attr("y2", function(d) { return d.target.y; });
+
+                    node
+                    .attr("cx", function(d) { return d.x; })
+                    .attr("cy", function(d) { return d.y; });
+                }
+            });
+
+            function dragstarted(d) {
+                if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(d) {
+                d.fx = d3.event.x;
+                d.fy = d3.event.y;
+            }
+
+            function dragended(d) {
+                if (!d3.event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+
+            function dragended(d) {
+                if (!d3.event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+
+        </script>
+    </head>
+</html>

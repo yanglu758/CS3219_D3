@@ -1,0 +1,59 @@
+{
+  "nodes": [
+      {"title": "A1", "id": "1a", 
+       "authors":[
+     {"ids":["7946155"],"name":"Andrea Crotti"},
+     {"ids":["3023208"],"name":"Giulia D. Chiara"},
+     {"ids":["1900779"],"name":"Silvia Ghezzi"},
+     {"ids":["5942324"],"name":"Rossella Lupo"},
+     {"ids":["1820889"],"name":"Rienk E Jeeninga"},
+     {"ids":["5795480"],"name":"Elio Liboi"},
+     {"ids":["7384004"],"name":"Patricia M.-J Lievens"},
+     {"ids":["5201535"],"name":"Elisa Vicenzi"},
+     {"ids":["7440271"],"name":"Chiara Bovolenta"},
+     {"ids":["1687070"],"name":"Ben Berkhout"},
+     {"ids":["6156528"],"name":"Guido Poli"}], 
+       "venue": "Singapore", 
+       "year": 2002,
+      "group": 1},
+      
+      {"title": "B1", "id": "2a", 
+       "authors":[
+     {"ids":["7946155"],"name":"Andrea Crotti"},
+     {"ids":["3023208"],"name":"Giulia D. Chiara"},
+     {"ids":["1900779"],"name":"Silvia Ghezzi"},
+     {"ids":["5942324"],"name":"Rossella Lupo"},
+     {"ids":["1820889"],"name":"Rienk E Jeeninga"},
+     {"ids":["5795480"],"name":"Elio Liboi"},
+     {"ids":["7384004"],"name":"Patricia M.-J Lievens"},
+     {"ids":["5201535"],"name":"Elisa Vicenzi"},
+     {"ids":["7440271"],"name":"Chiara Bovolenta"},
+     {"ids":["1687070"],"name":"Ben Berkhout"},
+     {"ids":["6156528"],"name":"Guido Poli"}], 
+       "venue": "Singapore", 
+       "year": 2004,
+      "group": 2},
+      
+      {"title": "C1", "id": "3a", 
+       "authors":[
+     {"ids":["7946155"],"name":"Andrea Crotti"},
+     {"ids":["3023208"],"name":"Giulia D. Chiara"},
+     {"ids":["1900779"],"name":"Silvia Ghezzi"},
+     {"ids":["5942324"],"name":"Rossella Lupo"},
+     {"ids":["1820889"],"name":"Rienk E Jeeninga"},
+     {"ids":["5795480"],"name":"Elio Liboi"},
+     {"ids":["7384004"],"name":"Patricia M.-J Lievens"},
+     {"ids":["5201535"],"name":"Elisa Vicenzi"},
+     {"ids":["7440271"],"name":"Chiara Bovolenta"},
+     {"ids":["1687070"],"name":"Ben Berkhout"},
+     {"ids":["6156528"],"name":"Guido Poli"}], 
+       "venue": "Singapore", 
+       "year": 2005,
+       "group": 3}
+      ],
+    
+  "links": [
+    {"source": "1a", "target": "2a"},
+    {"source": "2a", "target": "3a"}
+  ]
+}
