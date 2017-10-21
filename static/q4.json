@@ -54,6 +54,6 @@
     
   "links": [
     {"source": "1a", "target": "2a"},
-    {"source": "2a", "target": "3a"}
+    {"source": "2a", "target": "4a"}
   ]
 }

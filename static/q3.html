@@ -65,9 +65,7 @@
                 var g = svg.append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                $.ajax({
-                    url: "/publication_years"
-                }).done(function(data) {
+                d3.json("publication_years", function(error, data) {
                     console.log(data);
                     x.domain(d3.extent(data, function(d) { return d.year; }));
                     y.domain([d3.min(data, function(d) { return d.noOfPub; }), d3.max(data, function(d) { return d.noOfPub; })]);

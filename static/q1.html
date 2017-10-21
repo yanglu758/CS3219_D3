@@ -80,9 +80,7 @@
                 tooltip.append('div')
                     .attr('class', 'percent');
 
-                $.ajax({
-                    url: "/top_authors"
-                }).done(function(dataset) {
+                d3.json("top_authors", function(error, dataset) {
                     //upon read data success, clean the data first
                     dataset.forEach(function(d) {
                         //adjust data here

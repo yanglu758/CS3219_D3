@@ -10,6 +10,7 @@ var topAuthors;
 var publicationYearsResult;
 var recompiledMap;
 var nodes;
+var nodesMap;
 var links;
 var topPapersOutCitations;
 
@@ -87,12 +88,16 @@ function serve() {
 
 function processMap(maps, venue) {
 	venue = venue.toLowerCase(); // search key
+	var titleKey = 'Low-density parity check codes over GF(q)'.toLowerCase();
 
 	var relatedAuthors = new Object();
 	var paperCitations = new Object();
 	var publicationYears = new Object();
 	var papersOutCitations = new Object();
+	nodes = new Array();
+	links = new Array();
 	recompiledMap = new Object();
+	var basePapers = new Array();
 	for (var i = 0; i < maps.length; i++) {
 		var id = maps[i]["id"];
 		if (maps[i] && maps[i]["venue"] && maps[i]["venue"].toLowerCase().includes(venue)) {
@@ -119,6 +124,7 @@ function processMap(maps, venue) {
 		}
 		// Q4
 		recompiledMap[id] = maps[i];
+		if (maps[i]["title"].toLowerCase().includes(titleKey)) basePapers.push(id);
 
 		//Q5
 		var nInCitations = maps[i]["outCitations"].length;
@@ -167,10 +173,10 @@ function processMap(maps, venue) {
 		});
 	}
 
-	//Q4
-	nodes = new Array();
-	links = new Array();
-	generateNodes(recompiledMap, "36adf8c327b95bdffe2778bf022e0234d433454a", 0);
+	console.log(basePapers);
+	for (var i = 0; i < basePapers.length; i++) {
+		generateNodes(recompiledMap, basePapers[i], 0);
+	}
 	console.log(nodes);
 	console.log(links);
 
@@ -190,32 +196,30 @@ function processMap(maps, venue) {
 	for (var i=0; i<10; i++) {
 		if (pqCitations.size()>0) topPapersOutCitations.push(pqCitations.deq());
 	}
-	console.log(topPapersOutCitations);
 }
 
 function generateNodes(map, node, nNest) {
-	var source = map[node];
-	if (nNest<=0 && node) {
-		if (source) {
-			nodes.push({
-				id: source["id"],
-				title: source["title"],
-				authors: source["authors"],
-				year: source["year"],
-				venue: source["venue"],
-				group: nNest+1
-			});
+	if (nNest<=2 && node && map[node]) {
+		nodes.push({
+			id: map[node]["id"],
+			title: map[node]["title"],
+			authors: map[node]["authors"],
+			year: map[node]["year"],
+			venue: map[node]["venue"],
+			group: nNest+1
+		});
 
-			var targets = map[node]["inCitations"];
-			for (var i = 0; i < targets.length; i++) {
-				links.push({
-					source: node,
-					target: targets[i]
-				});
-				generateNodes(map, targets[i], nNest+1);
+		var targets = map[node]["inCitations"];
+		for (var i = 0; i < targets.length; i++) {
+			if (map[targets[i]]) {
+				if (generateNodes(map, targets[i], nNest+1)) {
+					links.push({
+						source: node,
+						target: targets[i]
+					});
+				}
 			}
-		} else {
-			nodes.push({ id: node });
 		}
-	}
+		return true;
+	} else return false;
 }

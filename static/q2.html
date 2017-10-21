@@ -81,9 +81,7 @@
                     .attr('class', 'percent');
                 var fakedata = [];
                 
-                $.ajax({
-                    url: "/top_papers"
-                }).done(function(dataset) {
+                d3.json("top_papers", function(error, dataset) {
                     var path = svg.selectAll('path')
                     .data(pie(dataset))
                     .enter()

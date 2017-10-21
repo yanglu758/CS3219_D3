@@ -91,6 +91,8 @@
             svg.call(tool_tip);
 
             d3.json("web_elements", function(error, graph) {
+                if (error) throw error;
+
                 console.log(graph);
 
                 var link = svg.append("g")
