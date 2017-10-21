@@ -202,7 +202,8 @@ function generateNodes(map, node, nNest) {
 				title: source["title"],
 				authors: source["authors"],
 				year: source["year"],
-				venue: source["venue"]
+				venue: source["venue"],
+				group: nNest+1
 			});
 
 			var targets = map[node]["inCitations"];
