@@ -1,15 +1,13 @@
-var LineByLineReader = require('line-by-line'), 
+const LineByLineReader = require('line-by-line'), 
 	JSONStream = require('JSONStream'),
 	PriorityQueue = require('priorityqueuejs'),
-	path = require('path');
+	path = require('path'),
+	express = require('express'),
+	app = express();
 
-const express = require('express');
-const app = express();
-
-var connect = require('connect'),
-	serveStatic = require('serve-static');
-
-var maps = [];
+var topPapers;
+var topAuthors;
+var recompiledMap;
 
 main();
 
@@ -19,6 +17,7 @@ function main() {
 
 function parse() {
 	var lr = new LineByLineReader('tiny1000.json');
+	var maps = new Array();
 
 	console.log("Loading data.json...");
 	lr.on('error', function (err) {
@@ -39,9 +38,37 @@ function parse() {
 }
 
 function serve() {
-	connect().use(serveStatic(__dirname)).listen(8080, function(){
-		console.log('Server running on 8080...');
+	app.use(express.static(__dirname + '/static'));
+	app.listen(process.env.PORT || 8080, function() {
+		console.log("Serving the app on 8080");
 	});
+	app.get('/', function(req, res) {
+		res.send("Welcome to D3!");
+	});
+	app.get('/Q1', function(req, res) {
+		res.sendFile(path.join(__dirname + '/static/q1.html'));
+	});
+	app.get('/Q2', function(req, res) {
+		res.sendFile(path.join(__dirname + '/static/Q2_papers.html'));
+	});
+	app.get('/Q3', function(req, res) {
+		res.sendFile(path.join(__dirname + '/static/q3.html'));
+	});
+	app.get('/Q4', function(req, res) {
+		res.sendFile(path.join(__dirname + '/static/q4.html'));
+	});
+	app.get('/Q5', function(req, res) {
+		res.sendFile(path.join(__dirname + '/static/q5.html'));
+	});
+	app.get('/top_papers', function(req, res) {
+		res.send(topPapers);
+	});
+	app.get('/top_authors', function(req, res) {
+		res.send(topAuthors);
+	});
+	app.get('/recompiledMap', function(req, res) {
+		res.send(recompiledMap);
+	})
 }
 
 function processMap(maps, venue) {
@@ -50,7 +77,7 @@ function processMap(maps, venue) {
 	var relatedAuthors = new Object();
 	var paperCitations = new Object();
 	var publicationYears = new Object();
-	var recompiledMap = new Object();
+	recompiledMap = new Object();
 	console.log(maps[1]);
 	for (var i = 0; i < maps.length; i++) {
 		var id = maps[i]["id"];
@@ -89,18 +116,18 @@ function processMap(maps, venue) {
 	for (var key in relatedAuthors) {
 		pqAuthors.enq({id: key, name: relatedAuthors[key]["name"], nCitations: relatedAuthors[key]["nCitations"]})
 	}
-	var topAuthurs = new Array();
+	topAuthors = new Array();
 	for (var i=0; i<10; i++) {
-		if (pqAuthors.size()>0) topAuthurs.push(pqAuthors.deq());
+		if (pqAuthors.size()>0) topAuthors.push(pqAuthors.deq());
 	}
-	console.log(topAuthurs);
+	console.log(topAuthors);
 	var pqCitations = new PriorityQueue(function (a, b) {
 		return a.nInCitations - b.nInCitations;
 	});
 	for (var key in paperCitations) {
 		pqCitations.enq({id: key, title: paperCitations[key]["title"], nInCitations: paperCitations[key]["nInCitations"]})
 	}
-	var topPapers = new Array();
+	topPapers = new Array();
 	for (var i=0; i<10; i++) {
 		if (pqCitations.size()>0) topPapers.push(pqCitations.deq());
 	}
