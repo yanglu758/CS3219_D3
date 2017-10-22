@@ -80,7 +80,7 @@
                 tooltip.append('div')
                     .attr('class', 'percent');
                 var fakedata = [];
-                
+
                 d3.json("top_papers", function(error, dataset) {
                     var path = svg.selectAll('path')
                     .data(pie(dataset))
@@ -161,7 +161,13 @@ tooltip.style('top', (d3.event.layerY + 10) + 'px')
                     legend.append('text')
                         .attr('x', legendRectSize + legendSpacing)
                         .attr('y', legendRectSize - legendSpacing)
-                        .text(function(d) { return d; });
+                        .text(function(d) {
+                        if(d.length > 50){
+                            return (d.substring(0,50) + "...");
+                        } else {
+                            return d;
+                        }    
+                    });
                 });
             })(window.d3);
         </script>
