@@ -43,7 +43,7 @@
     </head>
     <body>
         <!-- NEW -->
-        <h1>Top 10 papers with the most out citations</h1>
+        <h1 style="text-align:center">Top 10 papers with the most out citations</h1>
         <div id="chart"></div>
         <script type="text/javascript" src="jquery-3.2.1.min.js"></script>
         <script src="d3.v4.min.js"></script>
@@ -80,7 +80,7 @@
                 tooltip.append('div')
                     .attr('class', 'percent');
                 var fakedata = [];
-                
+
                 d3.json("top_out_citations", function(error, dataset) {
                     var path = svg.selectAll('path')
                     .data(pie(dataset))
@@ -161,7 +161,13 @@ tooltip.style('top', (d3.event.layerY + 10) + 'px')
                     legend.append('text')
                         .attr('x', legendRectSize + legendSpacing)
                         .attr('y', legendRectSize - legendSpacing)
-                        .text(function(d) { return d; });
+                        .text(function(d) {
+                        if(d.length > 40){
+                            return (d.substring(0,40) + "...");
+                        } else {
+                            return d;
+                        }    
+                    });
                 });
             })(window.d3);
         </script>
