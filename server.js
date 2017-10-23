@@ -1,5 +1,4 @@
-const LineByLineReader = require('line-by-line'), 
-	JSONStream = require('JSONStream'),
+const LineByLineReader = require('line-by-line'),
 	PriorityQueue = require('priorityqueuejs'),
 	path = require('path'),
 	express = require('express'),

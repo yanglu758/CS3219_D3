@@ -18,6 +18,9 @@
   },
   "homepage": "https://github.com/yang07ly/CS3219_D3#readme",
   "dependencies": {
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "line-by-line": "^0.1.5",
+    "path": "^0.12.7",
+    "priorityqueuejs": "^1.0.0"
   }
 }
