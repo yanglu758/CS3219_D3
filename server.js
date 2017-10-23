@@ -173,12 +173,9 @@ function processMap(maps, venue) {
 		});
 	}
 
-	console.log(basePapers);
 	for (var i = 0; i < basePapers.length; i++) {
 		generateNodes(recompiledMap, basePapers[i], 0);
 	}
-	console.log(nodes);
-	console.log(links);
 
 	//Q5
 	pqCitations = new PriorityQueue(function (a, b) {
